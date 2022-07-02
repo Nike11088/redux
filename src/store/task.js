@@ -13,6 +13,9 @@ const taskSlice = createSlice({
     set(state, action) {
       return action.payload
     },
+    create(state, action) {
+      state.push(action.payload)
+    },
     update(state, action) {
       const elementIndex = state.findIndex((el) => el.id === action.payload.id)
       state[elementIndex] = {
@@ -27,13 +30,22 @@ const taskSlice = createSlice({
 })
 
 const { actions, reducer: taskReducer } = taskSlice
-const { update, remove, set } = actions
+const { update, remove, set, create } = actions
 
 export const getTasks = () => async (dispatch) => {
   try {
     const { data } = await todosService.fetch()
     dispatch(set(data))
   } catch (error) {}
+}
+
+export const createTask = () => async (dispatch, getState) => {
+  try {
+    const { data } = await todosService.create()
+    dispatch(create(data))
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 export const completeTask = (id) => (dispatch, getState) => {

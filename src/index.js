@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { completeTask, titleChanged, taskDeleted, getTasks } from './store/task'
+import {
+  completeTask,
+  titleChanged,
+  taskDeleted,
+  getTasks,
+  createTask,
+} from './store/task'
 import configureStore from './store/store'
 
 const store = configureStore()
 
 const App = (params) => {
   const [state, setState] = useState(store.getState())
+
+  console.log(state)
 
   useEffect(() => {
     store.dispatch(getTasks())
@@ -39,6 +47,7 @@ const App = (params) => {
           </li>
         ))}
       </ul>
+      <button onClick={() => store.dispatch(createTask())}>Create task</button>
     </>
   )
 }
