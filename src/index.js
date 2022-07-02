@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import * as actions from './store/actions'
-import { initiateStore } from './store/store'
+import {taskCompleted, titleChanged, taskDeleted} from './store/task'
+import configureStore from './store/store'
 
-const store = initiateStore()
+const store = configureStore()
 
 const App = (params) => {
   const [state, setState] = useState(store.getState())
@@ -15,13 +15,13 @@ const App = (params) => {
   }, [])
 
   const completeTask = (taskId) => {
-    store.dispatch(actions.taskCompleted(taskId))
+    store.dispatch(taskCompleted(taskId))
   }
   const changeTitle = (taskId) => {
-    store.dispatch(actions.titleChanged(taskId))
+    store.dispatch(titleChanged(taskId))
   }
-  const removeTask = (taskId) => {
-    store.dispatch(actions.taskRemoved(taskId))
+  const deleteTask = (taskId) => {
+    store.dispatch(taskDeleted(taskId))
   }
 
   return (
@@ -34,7 +34,7 @@ const App = (params) => {
             <p> {`Completed: ${el.completed}`}</p>
             <button onClick={() => completeTask(el.id)}>Complete</button>
             <button onClick={() => changeTitle(el.id)}>Change title</button>
-            <button onClick={() => removeTask(el.id)}>Remove</button>
+            <button onClick={() => deleteTask(el.id)}>Remove</button>
             <hr />
           </li>
         ))}
