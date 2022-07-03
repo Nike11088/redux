@@ -1,33 +1,43 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
+import { Provider, useSelector, useDispatch } from 'react-redux'
 import ReactDOM from 'react-dom'
 import {
   completeTask,
   titleChanged,
   taskDeleted,
+  loadTasks,
   getTasks,
   createTask,
+  getTasksLoadingStatus,
 } from './store/task'
 import configureStore from './store/store'
+import { getError } from './store/errors'
 
 const store = configureStore()
 
 const App = (params) => {
-  const [state, setState] = useState(store.getState())
-
-  console.log(state)
+  const state = useSelector(getTasks())
+  const isLoading = useSelector(getTasksLoadingStatus())
+  const error = useSelector(getError())
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    store.dispatch(getTasks())
-    store.subscribe(() => {
-      setState(store.getState())
-    })
+    dispatch(loadTasks())
   }, [])
 
   const changeTitle = (taskId) => {
-    store.dispatch(titleChanged(taskId))
+    dispatch(titleChanged(taskId))
   }
   const deleteTask = (taskId) => {
-    store.dispatch(taskDeleted(taskId))
+    dispatch(taskDeleted(taskId))
+  }
+
+  if (isLoading) {
+    return <h1>Loading</h1>
+  }
+
+  if (error) {
+    return <p>{error}</p>
   }
 
   return (
@@ -47,14 +57,16 @@ const App = (params) => {
           </li>
         ))}
       </ul>
-      <button onClick={() => store.dispatch(createTask())}>Create task</button>
+      <button onClick={() => dispatch(createTask())}>Create task</button>
     </>
   )
 }
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 )
