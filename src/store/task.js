@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAction } from '@reduxjs/toolkit'
 import todosService from '../services/todos.service'
 import { setError } from './errors'
 
@@ -12,8 +12,8 @@ const taskSlice = createSlice({
       state.entities = action.payload
       state.isLoading = false
     },
-    create(state, action) {
-      state.push(action.payload)
+    taskAdded(state, action) {
+      state.entities.push(action.payload)
     },
     update(state, action) {
       const elementIndex = state.entities.findIndex(
@@ -27,7 +27,7 @@ const taskSlice = createSlice({
     remove(state, action) {
       state.entities = state.entities.filter((t) => t.id !== action.payload.id)
     },
-    taskReqested(state) {
+    loadTasksReqested(state) {
       state.isLoading = true
     },
     taskReqestFailed(state, action) {
@@ -37,11 +37,19 @@ const taskSlice = createSlice({
 })
 
 const { actions, reducer: taskReducer } = taskSlice
-const { update, remove, received, create, taskReqested, taskReqestFailed } =
-  actions
+const {
+  update,
+  remove,
+  received,
+  taskAdded,
+  loadTasksReqested,
+  taskReqestFailed,
+} = actions
+
+const taskReqested = createAction('task/taskReqested')
 
 export const loadTasks = () => async (dispatch) => {
-  dispatch(taskReqested())
+  dispatch(loadTasksReqested())
   try {
     const { data } = await todosService.fetch()
     dispatch(received(data))
@@ -51,16 +59,18 @@ export const loadTasks = () => async (dispatch) => {
   }
 }
 
-export const createTask = () => async (dispatch, getState) => {
+export const addTask = (task) => async (dispatch) => {
+  dispatch(taskReqested())
   try {
-    const { data } = await todosService.create()
-    dispatch(create(data))
+    const { data } = await todosService.create(task)
+    dispatch(taskAdded(data))
   } catch (error) {
-    console.error(error)
+    dispatch(taskReqestFailed())
+    dispatch(setError(error.message))
   }
 }
 
-export const completeTask = (id) => (dispatch, getState) => {
+export const completeTask = (id) => (dispatch) => {
   dispatch(update({ id, completed: true }))
 }
 export function titleChanged(id) {
